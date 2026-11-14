@@ -236,11 +236,48 @@ def describe_store(db_path):
     return total, rows
 
 
+# The message a user is most likely to hit first, and the only place the project
+# explains what a candle store is. Written for someone who has never seen one:
+# what it is, why there is no shared fallback, what it costs, and where to get one.
 EMPTY_HELP = (
-    "Sanyam's candle store has no bars for %s at %s.\n"
-    "Fetch them into it first, from the sanyam/backend directory:\n"
+    "No bars for %s at %s in the candle store.\n"
+    "\n"
+    "The store is a local SQLite file of intraday bars that you fetch once with\n"
+    "your own broker credentials; these tools then read it with no network call\n"
+    "and no rate limit. Intraday data cannot be redistributed, so there is no\n"
+    "shared source to fall back on \u2014 every user fetches their own.\n"
+    "\n"
+    "If you have a store already, fill this symbol in with:\n"
     "    python -m app.candles.fetch --symbol \"%s\" --interval 1m --from %s --to %s\n"
-    "That needs a live KITE_ACCESS_TOKEN (Zerodha mints one per day) and Kite's\n"
-    "historical-data add-on, which is billed separately from Kite Connect. Or pass\n"
-    "--source db to read whatever OpenAlgo has already downloaded."
+    "\n"
+    "That needs a live KITE_ACCESS_TOKEN, which Zerodha mints once a day, plus\n"
+    "Kite's historical-data subscription. Or pass --source db to read what\n"
+    "OpenAlgo already has.\n"
+    "\n"
+    "No store yet? Sanyam is a free local trading desk that writes one:\n"
+    "https://sanyam.app/desk"
 )
+
+EMPTY_SHORT = "No bars for %s at %s in the candle store."
+
+_explained = False
+
+
+def empty_help(symbol, interval, start, end=None):
+    """The long explanation once per run, a one-line note for every symbol after.
+
+    A watchlist with twenty missing symbols should not reprint fifteen lines of
+    setup instructions twenty times; the second one onwards only needs to say
+    which symbol was missing.
+    """
+    global _explained
+    if _explained:
+        return EMPTY_SHORT % (symbol, interval)
+    _explained = True
+    return EMPTY_HELP % (symbol, interval, symbol, start, end if end is not None else start)
+
+
+def reset_empty_help():
+    """Tests run many scans in one process; each should start from a clean slate."""
+    global _explained
+    _explained = False

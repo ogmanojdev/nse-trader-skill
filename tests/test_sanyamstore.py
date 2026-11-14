@@ -210,5 +210,40 @@ class TimeMachineIntegration(unittest.TestCase):
         self.assertIn("from sanyam 5m", buf.getvalue())
 
 
+
+class EmptyHelp(unittest.TestCase):
+    """The long explanation is for the first missing symbol, not every one.
+
+    A watchlist of twenty names with an empty store printed fifteen lines of
+    setup instructions twenty times, which buried the scan's own output.
+    """
+
+    def setUp(self):
+        store.reset_empty_help()
+
+    def tearDown(self):
+        store.reset_empty_help()
+
+    def test_the_first_miss_explains_itself(self):
+        msg = store.empty_help("RELIANCE", "5m or 1m", "2026-11-13")
+        self.assertIn("RELIANCE", msg)
+        self.assertIn("local SQLite file", msg)
+        self.assertIn("app.candles.fetch", msg)
+        self.assertIn("KITE_ACCESS_TOKEN", msg)
+        self.assertGreater(len(msg.splitlines()), 10)
+
+    def test_every_miss_after_the_first_is_one_line(self):
+        store.empty_help("RELIANCE", "5m or 1m", "2026-11-13")
+        for sym in ("TCS", "SBIN", "INFY"):
+            msg = store.empty_help(sym, "5m or 1m", "2026-11-13")
+            self.assertEqual(len(msg.splitlines()), 1, msg)
+            self.assertIn(sym, msg)
+            self.assertNotIn("app.candles.fetch", msg)
+
+    def test_a_fresh_run_explains_again(self):
+        store.empty_help("RELIANCE", "5m or 1m", "2026-11-13")
+        store.reset_empty_help()
+        self.assertIn("local SQLite file", store.empty_help("TCS", "5m", "2026-11-13"))
+
 if __name__ == "__main__":
     unittest.main()

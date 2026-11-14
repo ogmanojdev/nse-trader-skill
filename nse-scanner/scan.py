@@ -454,9 +454,8 @@ def intraday_series(sym, day, a):
                 bars = sanyamstore.aggregate(one, 300)
                 origin = "sanyam 1m aggregated"
         if not bars:
-            raise ScanError(sanyamstore.EMPTY_HELP % (
-                sanyamstore.sanyam_symbol(sym), "5m or 1m",
-                sanyamstore.sanyam_symbol(sym), day.isoformat(), day.isoformat()))
+            raise ScanError(sanyamstore.empty_help(
+                sanyamstore.sanyam_symbol(sym), "5m or 1m", day.isoformat()))
         return sanyamstore.as_series(bars), origin
     return nsedata.series_from_chart(
         nsedata.yahoo_get(nsedata.chart_path(sym, "1d", "5m"))), "yahoo"
@@ -595,8 +594,10 @@ def main(argv=None):
     p.add_argument("--min-price", type=float, default=20.0)
     p.add_argument("--max-charts", type=int, default=40, help="Yahoo throttles; keep this small")
     p.add_argument("--sanyam", nargs="?", const="", metavar="DB",
-                   help="read bars from Sanyam's candle store instead of Yahoo (no network "
-                        "call). The path is found automatically if omitted.")
+                   help="read 5-minute bars from a local candle store rather than Yahoo: "
+                        "your own broker data, no network call, no rate limit. Sanyam "
+                        "writes one (free, sanyam.app). Path found automatically if "
+                        "omitted.")
     p.add_argument("--allow-live-agg", action="store_true",
                    help="accept LIVE_AGG bars, whose intrabar extremes are approximate")
     p.add_argument("--pause", type=float, default=1.0)
