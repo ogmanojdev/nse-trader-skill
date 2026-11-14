@@ -1,7 +1,7 @@
 {
   "name": "nse-day-trader-skill",
   "description": "Six Claude skills for day trading Indian equities: scan the whole NSE cash market from the exchange's own data, read the filing feed that moves a stock, replay a trade before you risk a rupee, and see what it costs after STT.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Manoj Dev"
   },

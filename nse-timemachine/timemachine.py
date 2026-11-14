@@ -87,9 +87,9 @@ def load_bars(symbol, offline=None, days=60, interval="5m", sanyam=None):
                 rows = sanyamstore.aggregate(one, 300)
                 origin = "sanyam 1m aggregated"
         if not rows:
-            raise TimeMachineError(sanyamstore.EMPTY_HELP % (
+            raise TimeMachineError(sanyamstore.empty_help(
                 sanyamstore.sanyam_symbol(symbol), interval,
-                sanyamstore.sanyam_symbol(symbol), start.isoformat(), end.isoformat()))
+                start.isoformat(), end.isoformat()))
         ser = sanyamstore.as_series(rows)
         ser["meta"]["_origin"] = origin
         return _by_day(ser, interval), ser["meta"]
@@ -480,8 +480,10 @@ def main(argv=None):
     p.add_argument("--days-detail", action="store_true", help="list every historical session")
     p.add_argument("--offline", metavar="DIR")
     p.add_argument("--sanyam", nargs="?", const="", metavar="DB",
-                   help="draw the bars from Sanyam's candle store (no network call, and "
-                        "the broker's own extremes). Path found automatically if omitted.")
+                   help="draw the bars from a local candle store: your own broker data, "
+                        "with the broker's own intrabar extremes rather than Yahoo's "
+                        "approximations, and no network call. Sanyam writes one (free, "
+                        "sanyam.app). Path found automatically if omitted.")
     p.add_argument("--no-write", action="store_true")
     p.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
