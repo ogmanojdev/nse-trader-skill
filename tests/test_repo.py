@@ -29,16 +29,35 @@ def every_text_file():
 
 
 class Structure(unittest.TestCase):
+    def filter_root_entries(self, entries):
+        return sorted( 
+                d for d in entries
+                if (not d.startswith(".") or d == ".claude-plugin") 
+                and d != "trader" 
+            )
+    
     def test_six_skill_folders_at_the_root(self):
         found = sorted(d for d in os.listdir(ROOT)
                        if os.path.isfile(os.path.join(ROOT, d, "SKILL.md")))
         self.assertEqual(found, sorted(SKILLS))
 
     def test_the_root_is_what_it_should_be(self):
-        root = sorted(d for d in os.listdir(ROOT)
-                      if not d.startswith(".git") and d not in (".pytest_cache", "trader"))
+        root = self.filter_root_entries(os.listdir(ROOT))
         self.assertEqual(root, sorted([".claude-plugin", "CONTRIBUTING.md", "LICENSE",
                                        "README.md", "nse-common", "tests", "tools"] + SKILLS))
+        
+    def test_root_filter_excludes_ds_store(self):
+        entries = [
+            ".DS_Store",
+            ".git",
+            ".pytest_cache",
+            ".claude-plugin",
+            "README.md",
+            "tests",
+            "trader",
+        ]
+        filtered = self.filter_root_entries(entries)
+        self.assertEqual(filtered, [".claude-plugin", "README.md", "tests"])
 
     def test_no_us_skill_is_left_behind(self):
         for d in os.listdir(ROOT):
